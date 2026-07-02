@@ -101,7 +101,8 @@ Revision caps are fixed system-wide (not tier-dependent): mockup 3 rounds, QA 2 
     {
       "page": "string", "sections": ["string"],
       "text_source": "client_provides | needs_writing | scraper_sourced",
-      "media_source": "client_provides | needs_sourcing | scraper_sourced",
+      "media_source": "client_provides | needs_sourcing | scraper_sourced | ai_generated",
+      "represents_real_subject": "boolean (true = stands in for something specific and real — team photos, storefront, actual product shots; false = decorative/illustrative)",
       "notes": "string | null"
     }
   ],
@@ -128,6 +129,8 @@ Revision caps are fixed system-wide (not tier-dependent): mockup 3 rounds, QA 2 
 ```
 
 `budget_tier` informs scope expectations only — it does not affect revision-round caps, which are fixed system-wide.
+
+**AI-generated imagery policy**: when `represents_real_subject` is `true`, `media_source` may never be `ai_generated` — a customer reasonably assumes a "team photo" or "storefront photo" is real, and generating a photorealistic stand-in for it is a trust problem, not a content-sourcing solution. AI generation (via Gemini Nano Banana Flash/Pro) is only appropriate for content `design-lock.json`'s `imagery_style` already treats as illustration/decorative, or for abstract hero graphics, icons, and backgrounds — never as a substitute for a specific real thing the client hasn't provided. The design agent should refuse (or escalate) a `content_inventory` item that pairs `represents_real_subject: true` with `media_source: ai_generated`.
 
 **Write ownership**: written once at kickoff (human/intake process); read-only for all agents thereafter.
 
@@ -201,7 +204,16 @@ Every leaf value uses a `SourcedField<T>` wrapper: `{value, source: own_site|pla
     }
   ],
   "approved_homepage_mockup_ref": "string",
-  "approved_mockup_revision_round": "number (the mockup_revision_round this lock was derived from)"
+  "approved_mockup_revision_round": "number (the mockup_revision_round this lock was derived from)",
+  "generated_assets": [
+    {
+      "file_path": "string (where the generated image lives in the repo)",
+      "prompt": "string (the prompt used, for regeneration/audit)",
+      "model": "nano_banana_flash | nano_banana_pro",
+      "cost_usd": "number",
+      "generated_at": "timestamp"
+    }
+  ]
 }
 ```
 
@@ -210,8 +222,11 @@ Contrast-pairing tokens (`text_on_primary`, `text_on_secondary`, `border`) exist
 **Policies**:
 - `component_catalog` is **append-only** — the single source of truth QA checks new patterns against. Design agent appends entries as it encounters new patterns building remaining pages (`added_during: "remaining_pages"`).
 - Any post-lock client-requested design change forces a **full return to `mockup_revision`** (consuming a round against its cap of 3); `design-lock.json` is regenerated from the newly approved homepage. No narrower amendment path.
+- `generated_assets` is **append-only**, same pattern as `component_catalog` — one entry per AI-generated image, written by the design agent whenever it generates one, subject to the AI-generated imagery policy in `kickoff.json` (never for content where `represents_real_subject` is `true`).
 
-**Write ownership**: written once by the design agent at homepage approval; appended to by the design agent during `design_remaining_pages`; read-only for all other agents.
+**Write ownership**: written once by the design agent at homepage approval; appended to (`component_catalog`, `generated_assets`) by the design agent during `design_remaining_pages`; read-only for all other agents.
+
+**Implementation note (not a schema field)**: the Gemini API key requires its own Google Cloud billing setup via AI Studio — a consumer Gemini Pro subscription does not cover programmatic API usage. Store the key as an environment variable available to the design agent's tool access; never in any committed pipeline file.
 
 ### 4. mockup-approval.json — client feedback on the homepage mockup
 
