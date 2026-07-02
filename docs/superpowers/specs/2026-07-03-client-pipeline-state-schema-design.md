@@ -28,7 +28,9 @@ One JSON file per pipeline stage/concern (not one giant file), so ownership per 
 
 **Format**: JSON, validated by JSON Schema.
 
-**Concurrency model**: strictly sequential. Only one agent is active per client at a time; there is no file-locking or concurrent-write concern to design for.
+**Concurrency model**: strictly sequential. Only one agent is active per client at a time; there is no file-locking or concurrent-write concern to design for. This trades away the wall-clock savings of running design and backend in parallel for simplicity — a deliberate, revisitable choice, not an oversight.
+
+**Implementation note**: "no concurrent-write concern" describes race conditions, not the importance of the write-ownership rules throughout this doc. Those rules (QA is the exclusive author of its findings' terminal statuses, clients can't author findings directly, agents can't self-dismiss their own QA findings) exist to preserve audit integrity, not just to prevent collisions — sequential execution doesn't make them optional. When the agents are built, these boundaries must be enforced via actual scoped tool/file permissions per agent, not left as documentation an agent could ignore.
 
 **Shared envelope**: every file wraps its content identically:
 ```json
@@ -159,7 +161,7 @@ Every leaf value uses a `SourcedField<T>` wrapper: `{value, source: own_site|pla
       "source": "own_site | web_search",
       "reuse_safe": "boolean (true = client's own words, safe verbatim; false = third-party text, must be rewritten)",
       "text_blocks": ["string"],
-      "images": [{"url": "string", "alt_text": "string | null"}]
+      "images": [{"url": "string", "alt_text": "string | null", "reuse_safe": "boolean (true = client's own photo, safe to use; false = web_search-sourced image, may be copyrighted/unlicensed for commercial use — do not use without separate rights clearance)"}]
     }
   ],
   "social_profiles_found": ["url"],
@@ -239,6 +241,8 @@ Contrast-pairing tokens (`text_on_primary`, `text_on_secondary`, `border`) exist
 ```
 
 Functional/integration feedback raised during mockup review isn't dropped just because backend hasn't started — it's tagged `deferred_to_stage` and picked up later.
+
+`screenshot_ref` is required here (unlike `qa-report.json`, where it's nullable): every client mockup comment is anchored via the annotation tool to a location on the page, so a screenshot always exists. QA can flag purely non-visual issues (console errors, failed API calls) with nothing to screenshot, which is why that file's equivalent field allows `null`.
 
 **Write ownership**:
 - **Feedback ingestion** (orchestrator/human intake): creates rounds, populates `feedback_items` (`status: open`), sets `deferred_to_stage`, sets `decided_status`/`decided_at`.
@@ -353,7 +357,7 @@ Cap-hit is not separate logic — it's the same `pass_condition`, just with no r
 | kickoff.json | human/intake (once) | all agents |
 | scraper-output.json | scraper agent (once) | design, backend, QA |
 | design-lock.json | design agent (write once + append during remaining_pages) | design, backend, QA, integration lead |
-| mockup-approval.json | intake (rounds/decisions), design (status on visual/content), backend (status on deferred functional/integration) | design, integration lead |
+| mockup-approval.json | intake (rounds/decisions), design (status on visual/content), backend (status on deferred functional/integration) | design, backend, integration lead |
 | qa-report.json | QA agent (exclusive) except `status→fixed_claimed/disputed` by design/backend on assigned findings | design, backend, integration lead |
 | signoff.json | integration lead (checklist/decisions), client intake (client_final_approval) | — |
 | pipeline-status.json | orchestrator (stage transitions, round mirrors) | all agents (first read on invocation) |
