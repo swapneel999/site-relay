@@ -1,0 +1,53 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-01T09:00:00Z",
+  "last_updated_by": "human/intake",
+  "data": {
+    "primary_contact": { "name": "Jane Doe", "email": "jane@acme.co", "role": "Owner" },
+    "languages": ["en"],
+    "business": {
+      "name": "Acme Co", "legal_name": "Acme Co LLC", "industry": "Home Services",
+      "description": "Residential plumbing in the Denver metro area.", "founded_year": 2012,
+      "existing_website_url": "https://acmeplumbing.example.com",
+      "social_profiles": ["https://facebook.com/acmeplumbing"],
+      "google_business_profile_url": "https://maps.google.com/?cid=12345",
+      "locations": [{ "address": "123 Main St, Denver, CO", "phone": "+1-303-555-0100", "hours": "Mon-Fri 8am-6pm" }]
+    },
+    "goals": { "primary_conversion_goal": "phone call booking", "secondary_goals": ["email signup"] },
+    "content_inventory": [
+      {
+        "page": "home", "sections": ["hero", "services", "testimonials"],
+        "text_source": "scraper_sourced", "media_source": "client_provides",
+        "represents_real_subject": true, "notes": null
+      },
+      {
+        "page": "home", "sections": ["hero-background"],
+        "text_source": "needs_writing", "media_source": "ai_generated",
+        "represents_real_subject": false, "notes": "abstract decorative background"
+      }
+    ],
+    "design_direction": {
+      "style_words": ["clean", "trustworthy"], "avoid": ["neon", "clip art"],
+      "reference_sites": ["https://example-competitor.com"],
+      "brand_assets": { "logo_url": "https://acme.co/logo.png", "existing_colors": ["#1A73E8"], "existing_fonts": ["Inter"] }
+    },
+    "functional_requirements": {
+      "forms": [{ "name": "Contact", "fields": ["name", "email", "message"], "destination_email": "leads@acme.co" }],
+      "payments": { "required": false, "provider": null },
+      "cms": { "required": false, "type": null },
+      "scheduling": { "required": true, "provider": "Calendly" },
+      "live_chat": { "required": false, "provider": null },
+      "newsletter": { "required": false, "provider": null },
+      "integrations": []
+    },
+    "constraints": {
+      "domain": "acmeplumbing.com", "timeline_deadline": "2026-09-01",
+      "budget_tier": "standard",
+      "compliance": { "accessibility_level": "AA", "privacy_regime": "CCPA" }
+    },
+    "acceptance_criteria": [
+      { "criterion": "Contact form delivers to leads@acme.co", "verification_method": "submit test form, confirm email receipt" }
+    ]
+  }
+}

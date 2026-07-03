@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-01T09:00:00Z",
+  "last_updated_by": "human/intake",
+  "data": {
+    "primary_contact": { "name": "Jane Doe", "email": "jane@acme.co", "role": "Owner" },
+    "languages": ["en"],
+    "business": {
+      "name": "Acme Co", "legal_name": null, "industry": "Home Services",
+      "description": "Residential plumbing.", "founded_year": null,
+      "existing_website_url": null, "social_profiles": [],
+      "google_business_profile_url": null, "locations": []
+    },
+    "goals": { "primary_conversion_goal": "phone call booking", "secondary_goals": [] },
+    "content_inventory": [
+      {
+        "page": "home", "sections": ["team-photo"],
+        "text_source": "needs_writing", "media_source": "ai_generated",
+        "represents_real_subject": true, "notes": "should be rejected: AI-generating a fake team photo"
+      }
+    ],
+    "design_direction": {
+      "style_words": [], "avoid": [], "reference_sites": [],
+      "brand_assets": { "logo_url": null, "existing_colors": [], "existing_fonts": [] }
+    },
+    "functional_requirements": {
+      "forms": [], "payments": { "required": false, "provider": null },
+      "cms": { "required": false, "type": null }, "scheduling": { "required": false, "provider": null },
+      "live_chat": { "required": false, "provider": null }, "newsletter": { "required": false, "provider": null },
+      "integrations": []
+    },
+    "constraints": {
+      "domain": null, "timeline_deadline": null, "budget_tier": "starter",
+      "compliance": { "accessibility_level": "none", "privacy_regime": "none" }
+    },
+    "acceptance_criteria": []
+  }
+}

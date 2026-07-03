@@ -1,0 +1,178 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "kickoff.schema.json",
+  "title": "kickoff.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_contact", "languages", "business", "goals", "content_inventory",
+        "design_direction", "functional_requirements", "constraints", "acceptance_criteria"
+      ],
+      "properties": {
+        "primary_contact": {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "email", "role"],
+          "properties": {
+            "name": { "type": "string" },
+            "email": { "type": "string", "format": "email" },
+            "role": { "type": "string" }
+          }
+        },
+        "languages": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+        "business": {
+          "type": "object", "additionalProperties": false,
+          "required": [
+            "name", "legal_name", "industry", "description", "founded_year",
+            "existing_website_url", "social_profiles", "google_business_profile_url", "locations"
+          ],
+          "properties": {
+            "name": { "type": "string" },
+            "legal_name": { "type": ["string", "null"] },
+            "industry": { "type": "string" },
+            "description": { "type": "string" },
+            "founded_year": { "type": ["integer", "null"] },
+            "existing_website_url": { "anyOf": [{ "$ref": "common.schema.json#/$defs/url" }, { "type": "null" }] },
+            "social_profiles": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/url" } },
+            "google_business_profile_url": { "anyOf": [{ "$ref": "common.schema.json#/$defs/url" }, { "type": "null" }] },
+            "locations": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["address", "phone", "hours"],
+                "properties": {
+                  "address": { "type": "string" }, "phone": { "type": "string" }, "hours": { "type": "string" }
+                }
+              }
+            }
+          }
+        },
+        "goals": {
+          "type": "object", "additionalProperties": false,
+          "required": ["primary_conversion_goal", "secondary_goals"],
+          "properties": {
+            "primary_conversion_goal": { "type": "string" },
+            "secondary_goals": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "content_inventory": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["page", "sections", "text_source", "media_source", "represents_real_subject", "notes"],
+            "properties": {
+              "page": { "type": "string" },
+              "sections": { "type": "array", "items": { "type": "string" } },
+              "text_source": { "enum": ["client_provides", "needs_writing", "scraper_sourced"] },
+              "media_source": { "enum": ["client_provides", "needs_sourcing", "scraper_sourced", "ai_generated"] },
+              "represents_real_subject": { "type": "boolean" },
+              "notes": { "type": ["string", "null"] }
+            },
+            "not": {
+              "properties": {
+                "media_source": { "const": "ai_generated" },
+                "represents_real_subject": { "const": true }
+              },
+              "required": ["media_source", "represents_real_subject"]
+            }
+          }
+        },
+        "design_direction": {
+          "type": "object", "additionalProperties": false,
+          "required": ["style_words", "avoid", "reference_sites", "brand_assets"],
+          "properties": {
+            "style_words": { "type": "array", "items": { "type": "string" } },
+            "avoid": { "type": "array", "items": { "type": "string" } },
+            "reference_sites": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/url" } },
+            "brand_assets": {
+              "type": "object", "additionalProperties": false,
+              "required": ["logo_url", "existing_colors", "existing_fonts"],
+              "properties": {
+                "logo_url": { "anyOf": [{ "$ref": "common.schema.json#/$defs/url" }, { "type": "null" }] },
+                "existing_colors": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/hexColor" } },
+                "existing_fonts": { "type": "array", "items": { "type": "string" } }
+              }
+            }
+          }
+        },
+        "functional_requirements": {
+          "type": "object", "additionalProperties": false,
+          "required": ["forms", "payments", "cms", "scheduling", "live_chat", "newsletter", "integrations"],
+          "properties": {
+            "forms": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["name", "fields", "destination_email"],
+                "properties": {
+                  "name": { "type": "string" },
+                  "fields": { "type": "array", "items": { "type": "string" } },
+                  "destination_email": { "anyOf": [{ "type": "string", "format": "email" }, { "type": "null" }] }
+                }
+              }
+            },
+            "payments": {
+              "type": "object", "additionalProperties": false,
+              "required": ["required", "provider"],
+              "properties": { "required": { "type": "boolean" }, "provider": { "type": ["string", "null"] } }
+            },
+            "cms": {
+              "type": "object", "additionalProperties": false,
+              "required": ["required", "type"],
+              "properties": { "required": { "type": "boolean" }, "type": { "type": ["string", "null"] } }
+            },
+            "scheduling": {
+              "type": "object", "additionalProperties": false,
+              "required": ["required", "provider"],
+              "properties": { "required": { "type": "boolean" }, "provider": { "type": ["string", "null"] } }
+            },
+            "live_chat": {
+              "type": "object", "additionalProperties": false,
+              "required": ["required", "provider"],
+              "properties": { "required": { "type": "boolean" }, "provider": { "type": ["string", "null"] } }
+            },
+            "newsletter": {
+              "type": "object", "additionalProperties": false,
+              "required": ["required", "provider"],
+              "properties": { "required": { "type": "boolean" }, "provider": { "type": ["string", "null"] } }
+            },
+            "integrations": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "constraints": {
+          "type": "object", "additionalProperties": false,
+          "required": ["domain", "timeline_deadline", "budget_tier", "compliance"],
+          "properties": {
+            "domain": { "type": ["string", "null"] },
+            "timeline_deadline": { "anyOf": [{ "type": "string", "format": "date" }, { "type": "null" }] },
+            "budget_tier": { "enum": ["starter", "standard", "premium"] },
+            "compliance": {
+              "type": "object", "additionalProperties": false,
+              "required": ["accessibility_level", "privacy_regime"],
+              "properties": {
+                "accessibility_level": { "enum": ["none", "AA", "AAA"] },
+                "privacy_regime": { "enum": ["none", "GDPR", "CCPA", "both"] }
+              }
+            }
+          }
+        },
+        "acceptance_criteria": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["criterion", "verification_method"],
+            "properties": { "criterion": { "type": "string" }, "verification_method": { "type": "string" } }
+          }
+        }
+      }
+    }
+  }
+}
