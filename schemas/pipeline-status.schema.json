@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "pipeline-status.schema.json",
+  "title": "pipeline-status.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "current_stage", "blocked", "blocked_reason",
+        "mockup_revision_round", "mockup_revision_cap",
+        "qa_revision_round", "qa_revision_cap", "stage_history"
+      ],
+      "properties": {
+        "current_stage": {
+          "enum": [
+            "kickoff", "scraping", "design_homepage", "mockup_review", "mockup_revision",
+            "design_locked", "design_remaining_pages", "backend_build", "qa", "qa_revision",
+            "integration_signoff", "complete", "blocked_needs_human"
+          ]
+        },
+        "blocked": { "type": "boolean" },
+        "blocked_reason": { "type": ["string", "null"] },
+        "mockup_revision_round": { "type": "integer", "minimum": 0 },
+        "mockup_revision_cap": { "const": 3 },
+        "qa_revision_round": { "type": "integer", "minimum": 0 },
+        "qa_revision_cap": { "const": 2 },
+        "stage_history": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["stage", "entered_at", "exited_at", "agent"],
+            "properties": {
+              "stage": { "type": "string" },
+              "entered_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+              "exited_at": {
+                "anyOf": [{ "$ref": "common.schema.json#/$defs/timestamp" }, { "type": "null" }]
+              },
+              "agent": { "type": "string" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
