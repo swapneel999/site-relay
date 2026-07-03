@@ -1,0 +1,30 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-03T16:00:00Z",
+  "last_updated_by": "integration-lead-agent",
+  "data": {
+    "current_round": 1,
+    "review_rounds": [
+      {
+        "round": 1, "reviewed_at": "2026-07-03T16:00:00Z",
+        "checklist": { "repo_pushed": true, "preview_deploy_live": true, "dns_domain_configured": "n/a", "env_vars_configured": true },
+        "unresolved_majors": [
+          {
+            "qa_finding_id": "qa-7", "page": "about", "issue": "Team photo slightly misaligned on mobile",
+            "category": "visual", "decision": "ship_anyway", "decision_note": "Cosmetic, client agreed to fix post-launch."
+          }
+        ],
+        "client_final_approval": {
+          "status": "approved", "approved_at": "2026-07-03T16:30:00Z", "approved_by": "Jane Doe", "notes": "Looks great!",
+          "requested_changes": []
+        },
+        "round_outcome": "promoted"
+      }
+    ],
+    "repo_url": "https://github.com/acme-builder/acme-co-site",
+    "preview_deploy_url": "https://acme-co-site-preview.vercel.app",
+    "production_url": "https://acmeplumbing.com",
+    "production_promotion_status": "promoted"
+  }
+}

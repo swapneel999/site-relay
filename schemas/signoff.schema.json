@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "signoff.schema.json",
+  "title": "signoff.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["current_round", "review_rounds", "repo_url", "preview_deploy_url", "production_url", "production_promotion_status"],
+      "properties": {
+        "current_round": { "type": "integer", "minimum": 1 },
+        "review_rounds": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["round", "reviewed_at", "checklist", "unresolved_majors", "client_final_approval", "round_outcome"],
+            "properties": {
+              "round": { "type": "integer", "minimum": 1 },
+              "reviewed_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+              "checklist": {
+                "type": "object", "additionalProperties": false,
+                "required": ["repo_pushed", "preview_deploy_live", "dns_domain_configured", "env_vars_configured"],
+                "properties": {
+                  "repo_pushed": { "type": "boolean" },
+                  "preview_deploy_live": { "type": "boolean" },
+                  "dns_domain_configured": { "anyOf": [{ "type": "boolean" }, { "const": "n/a" }] },
+                  "env_vars_configured": { "type": "boolean" }
+                }
+              },
+              "unresolved_majors": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["qa_finding_id", "page", "issue", "category", "decision", "decision_note"],
+                  "properties": {
+                    "qa_finding_id": { "$ref": "common.schema.json#/$defs/opaqueId" },
+                    "page": { "type": "string" },
+                    "issue": { "type": "string" },
+                    "category": { "$ref": "common.schema.json#/$defs/category" },
+                    "decision": { "enum": ["ship_anyway", "kick_back_to_qa"] },
+                    "decision_note": { "type": ["string", "null"] }
+                  }
+                }
+              },
+              "client_final_approval": {
+                "type": "object", "additionalProperties": false,
+                "required": ["status", "approved_at", "approved_by", "notes", "requested_changes"],
+                "properties": {
+                  "status": { "enum": ["pending", "approved", "changes_requested"] },
+                  "approved_at": { "anyOf": [{ "$ref": "common.schema.json#/$defs/timestamp" }, { "type": "null" }] },
+                  "approved_by": { "type": ["string", "null"] },
+                  "notes": { "type": ["string", "null"] },
+                  "requested_changes": {
+                    "type": "array",
+                    "items": {
+                      "type": "object", "additionalProperties": false,
+                      "required": ["page", "issue", "category", "client_flagged_blocking"],
+                      "properties": {
+                        "page": { "type": "string" },
+                        "issue": { "type": "string" },
+                        "category": { "$ref": "common.schema.json#/$defs/category" },
+                        "client_flagged_blocking": { "type": "boolean" }
+                      }
+                    }
+                  }
+                }
+              },
+              "round_outcome": { "enum": ["promoted", "returned_to_qa", "pending"] }
+            }
+          }
+        },
+        "repo_url": { "$ref": "common.schema.json#/$defs/url" },
+        "preview_deploy_url": { "$ref": "common.schema.json#/$defs/url" },
+        "production_url": { "anyOf": [{ "$ref": "common.schema.json#/$defs/url" }, { "type": "null" }] },
+        "production_promotion_status": { "enum": ["not_promoted", "promoted"] }
+      }
+    }
+  }
+}
