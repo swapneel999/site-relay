@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "qa-report.schema.json",
+  "title": "qa-report.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["overall_status", "current_round", "rounds"],
+      "properties": {
+        "overall_status": { "enum": ["pass", "fail"] },
+        "current_round": { "type": "integer", "minimum": 1 },
+        "rounds": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["round", "scope", "tested_at", "findings", "acceptance_criteria_check", "round_result"],
+            "properties": {
+              "round": { "type": "integer", "minimum": 1 },
+              "scope": { "const": "full" },
+              "tested_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+              "findings": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["id", "reopened_from_id", "page", "issue", "severity", "category", "screenshot_ref", "status", "agent_note"],
+                  "properties": {
+                    "id": { "$ref": "common.schema.json#/$defs/opaqueId" },
+                    "reopened_from_id": { "anyOf": [{ "$ref": "common.schema.json#/$defs/opaqueId" }, { "type": "null" }] },
+                    "page": { "type": "string" },
+                    "issue": { "type": "string" },
+                    "severity": { "$ref": "common.schema.json#/$defs/severity" },
+                    "category": { "$ref": "common.schema.json#/$defs/category" },
+                    "screenshot_ref": { "type": ["string", "null"] },
+                    "status": { "enum": ["open", "fixed_claimed", "disputed", "verified_fixed", "wont_fix", "superseded"] },
+                    "agent_note": { "type": ["string", "null"] }
+                  }
+                }
+              },
+              "acceptance_criteria_check": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["criterion", "verification_method", "verified", "note"],
+                  "properties": {
+                    "criterion": { "type": "string" },
+                    "verification_method": { "type": "string" },
+                    "verified": { "type": "boolean" },
+                    "note": { "type": ["string", "null"] }
+                  }
+                }
+              },
+              "round_result": { "enum": ["pass", "fail"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
