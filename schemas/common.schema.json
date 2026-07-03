@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "common.schema.json",
+  "$defs": {
+    "timestamp": { "type": "string", "format": "date-time" },
+    "url": { "type": "string", "format": "uri" },
+    "hexColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
+    "opaqueId": { "type": "string", "minLength": 1 },
+    "category": { "enum": ["visual", "content", "functional", "integration"] },
+    "severity": { "enum": ["blocker", "major", "minor"] },
+    "sourcedFieldSource": { "enum": ["own_site", "places_api", "web_search", "not_found"] },
+    "sourcedFieldConfidence": { "enum": ["verified", "inferred", "missing"] },
+    "sourcedFieldString": {
+      "type": "object",
+      "required": ["value", "source", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": ["string", "null"] },
+        "source": { "$ref": "#/$defs/sourcedFieldSource" },
+        "confidence": { "$ref": "#/$defs/sourcedFieldConfidence" }
+      }
+    },
+    "sourcedFieldNumber": {
+      "type": "object",
+      "required": ["value", "source", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": ["number", "null"] },
+        "source": { "$ref": "#/$defs/sourcedFieldSource" },
+        "confidence": { "$ref": "#/$defs/sourcedFieldConfidence" }
+      }
+    },
+    "sourcedFieldStringArray": {
+      "type": "object",
+      "required": ["value", "source", "confidence"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": ["array", "null"], "items": { "type": "string" } },
+        "source": { "$ref": "#/$defs/sourcedFieldSource" },
+        "confidence": { "$ref": "#/$defs/sourcedFieldConfidence" }
+      }
+    }
+  }
+}
