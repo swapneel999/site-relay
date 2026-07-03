@@ -1,0 +1,111 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "design-lock.schema.json",
+  "title": "design-lock.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tokens", "component_catalog", "approved_homepage_mockup_ref", "approved_mockup_revision_round", "generated_assets"],
+      "properties": {
+        "tokens": {
+          "type": "object", "additionalProperties": false,
+          "required": ["colors", "typography", "spacing_scale", "radius", "shadow_style", "imagery_style", "breakpoints"],
+          "properties": {
+            "colors": {
+              "type": "object", "additionalProperties": false,
+              "required": [
+                "primary", "secondary", "accent", "background", "surface",
+                "text_primary", "text_secondary", "text_on_primary", "text_on_secondary",
+                "border", "success", "warning", "error"
+              ],
+              "properties": {
+                "primary": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "secondary": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "accent": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "background": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "surface": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "text_primary": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "text_secondary": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "text_on_primary": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "text_on_secondary": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "border": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "success": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "warning": { "$ref": "common.schema.json#/$defs/hexColor" },
+                "error": { "$ref": "common.schema.json#/$defs/hexColor" }
+              }
+            },
+            "typography": {
+              "type": "object", "additionalProperties": false,
+              "required": ["heading_font", "body_font", "scale"],
+              "properties": {
+                "heading_font": { "type": "string" },
+                "body_font": { "type": "string" },
+                "scale": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["h1", "h2", "h3", "body", "small"],
+                  "properties": {
+                    "h1": { "type": "string" }, "h2": { "type": "string" }, "h3": { "type": "string" },
+                    "body": { "type": "string" }, "small": { "type": "string" }
+                  }
+                }
+              }
+            },
+            "spacing_scale": { "type": "array", "items": { "type": "string" } },
+            "radius": { "type": "string" },
+            "shadow_style": { "type": "string" },
+            "imagery_style": { "type": "string" },
+            "breakpoints": {
+              "type": "object", "additionalProperties": false,
+              "required": ["mobile", "tablet", "desktop"],
+              "properties": {
+                "mobile": { "type": "string", "pattern": "^[0-9]+px$" },
+                "tablet": { "type": "string", "pattern": "^[0-9]+px$" },
+                "desktop": { "type": "string", "pattern": "^[0-9]+px$" }
+              }
+            }
+          }
+        },
+        "component_catalog": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["pattern", "library", "component_name", "file_path", "variant_notes", "added_at", "added_during"],
+            "properties": {
+              "pattern": { "type": "string" },
+              "library": { "enum": ["shadcn", "reactbits"] },
+              "component_name": { "type": "string" },
+              "file_path": { "type": "string" },
+              "variant_notes": { "type": ["string", "null"] },
+              "added_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+              "added_during": { "enum": ["homepage", "remaining_pages"] }
+            }
+          }
+        },
+        "approved_homepage_mockup_ref": { "type": "string" },
+        "approved_mockup_revision_round": { "type": "integer", "minimum": 1 },
+        "generated_assets": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["file_path", "prompt", "model", "cost_usd", "generated_at"],
+            "properties": {
+              "file_path": { "type": "string" },
+              "prompt": { "type": "string" },
+              "model": { "enum": ["nano_banana_flash", "nano_banana_pro"] },
+              "cost_usd": { "type": "number", "minimum": 0 },
+              "generated_at": { "$ref": "common.schema.json#/$defs/timestamp" }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-02T11:00:00Z",
+  "last_updated_by": "design-agent",
+  "data": {
+    "tokens": {
+      "colors": {
+        "primary": "blue", "secondary": "#34A853", "accent": "#FBBC05",
+        "background": "#FFFFFF", "surface": "#F5F5F5",
+        "text_primary": "#202124", "text_secondary": "#5F6368",
+        "text_on_primary": "#FFFFFF", "text_on_secondary": "#FFFFFF",
+        "border": "#DADCE0", "success": "#188038", "warning": "#F29900", "error": "#D93025"
+      },
+      "typography": { "heading_font": "Inter", "body_font": "Inter", "scale": { "h1": "48px", "h2": "36px", "h3": "24px", "body": "16px", "small": "14px" } },
+      "spacing_scale": [], "radius": "8px", "shadow_style": "soft", "imagery_style": "photographic",
+      "breakpoints": { "mobile": "375px", "tablet": "768px", "desktop": "1280px" }
+    },
+    "component_catalog": [],
+    "approved_homepage_mockup_ref": "mockup/screenshots/round-1/homepage.png",
+    "approved_mockup_revision_round": 1,
+    "generated_assets": []
+  }
+}
