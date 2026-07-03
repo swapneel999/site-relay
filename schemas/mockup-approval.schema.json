@@ -1,0 +1,68 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "mockup-approval.schema.json",
+  "title": "mockup-approval.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "current_round", "rounds"],
+      "properties": {
+        "status": { "enum": ["pending", "changes_requested", "approved"] },
+        "current_round": { "type": "integer", "minimum": 1 },
+        "rounds": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["round", "mockup_ref", "submitted_at", "feedback_items", "decided_at", "decided_status"],
+            "properties": {
+              "round": { "type": "integer", "minimum": 1 },
+              "mockup_ref": { "type": "string" },
+              "submitted_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+              "feedback_items": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["id", "page", "element", "screenshot_ref", "annotation_coords", "requested_change", "category", "deferred_to_stage", "status", "agent_note"],
+                  "properties": {
+                    "id": { "$ref": "common.schema.json#/$defs/opaqueId" },
+                    "page": { "type": "string" },
+                    "element": { "type": "string" },
+                    "screenshot_ref": { "type": "string" },
+                    "annotation_coords": {
+                      "anyOf": [
+                        {
+                          "type": "object", "additionalProperties": false,
+                          "required": ["x", "y", "width", "height"],
+                          "properties": {
+                            "x": { "type": "number" }, "y": { "type": "number" },
+                            "width": { "type": "number" }, "height": { "type": "number" }
+                          }
+                        },
+                        { "type": "null" }
+                      ]
+                    },
+                    "requested_change": { "type": "string" },
+                    "category": { "$ref": "common.schema.json#/$defs/category" },
+                    "deferred_to_stage": { "type": ["string", "null"] },
+                    "status": { "enum": ["open", "addressed", "wont_fix"] },
+                    "agent_note": { "type": ["string", "null"] }
+                  }
+                }
+              },
+              "decided_at": { "anyOf": [{ "$ref": "common.schema.json#/$defs/timestamp" }, { "type": "null" }] },
+              "decided_status": { "anyOf": [{ "enum": ["changes_requested", "approved"] }, { "type": "null" }] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-02T15:00:00Z",
+  "last_updated_by": "orchestrator",
+  "data": {
+    "status": "changes_requested",
+    "current_round": 1,
+    "rounds": [
+      {
+        "round": 1, "mockup_ref": "mockup/screenshots/round-1/homepage.png", "submitted_at": "2026-07-02T14:00:00Z",
+        "feedback_items": [
+          {
+            "id": "fb-1", "page": "home", "element": "hero headline",
+            "screenshot_ref": "mockup/screenshots/round-1/homepage.png",
+            "annotation_coords": { "x": 100, "y": 50, "width": 300, "height": 40 },
+            "requested_change": "Make the headline shorter", "category": "visual",
+            "deferred_to_stage": null, "status": "open", "agent_note": null
+          },
+          {
+            "id": "fb-2", "page": "home", "element": "booking widget",
+            "screenshot_ref": "mockup/screenshots/round-1/homepage.png",
+            "annotation_coords": null,
+            "requested_change": "Wire this up to Calendly", "category": "functional",
+            "deferred_to_stage": "backend_build", "status": "open", "agent_note": null
+          }
+        ],
+        "decided_at": "2026-07-02T15:00:00Z", "decided_status": "changes_requested"
+      }
+    ]
+  }
+}
