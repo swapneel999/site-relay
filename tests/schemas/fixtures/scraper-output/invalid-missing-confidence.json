@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-01T10:00:00Z",
+  "last_updated_by": "scraper-agent",
+  "data": {
+    "scrape_mode": "own_site",
+    "completeness": "good",
+    "business_info": {
+      "name": { "value": "Acme Plumbing", "source": "own_site" },
+      "address": { "value": "123 Main St, Denver, CO", "source": "own_site", "confidence": "verified" },
+      "phone": { "value": "+1-303-555-0100", "source": "own_site", "confidence": "verified" },
+      "hours": { "value": "Mon-Fri 8am-6pm", "source": "own_site", "confidence": "verified" },
+      "categories": { "value": ["Plumber"], "source": "own_site", "confidence": "verified" },
+      "price_level": { "value": null, "source": "not_found", "confidence": "missing" }
+    },
+    "reviews": {
+      "aggregate_rating": { "value": 4.8, "source": "places_api", "confidence": "verified" },
+      "review_count": { "value": 152, "source": "places_api", "confidence": "verified" },
+      "places_place_id": { "value": "ChIJabc123", "source": "places_api", "confidence": "verified" },
+      "live_display": { "mode": "live_fetch", "max_results": 6, "sort": "highest_rated", "note": "n/a" },
+      "own_site_testimonials": []
+    },
+    "content_found": [],
+    "social_profiles_found": [],
+    "scrape_notes": []
+  }
+}

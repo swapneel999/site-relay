@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-01T10:00:00Z",
+  "last_updated_by": "scraper-agent",
+  "data": {
+    "scrape_mode": "own_site",
+    "completeness": "good",
+    "business_info": {
+      "name": { "value": "Acme Plumbing", "source": "own_site", "confidence": "verified" },
+      "address": { "value": "123 Main St, Denver, CO", "source": "own_site", "confidence": "verified" },
+      "phone": { "value": "+1-303-555-0100", "source": "own_site", "confidence": "verified" },
+      "hours": { "value": "Mon-Fri 8am-6pm", "source": "own_site", "confidence": "verified" },
+      "categories": { "value": ["Plumber", "Emergency Service"], "source": "own_site", "confidence": "verified" },
+      "price_level": { "value": null, "source": "not_found", "confidence": "missing" }
+    },
+    "reviews": {
+      "aggregate_rating": { "value": 4.8, "source": "places_api", "confidence": "verified" },
+      "review_count": { "value": 152, "source": "places_api", "confidence": "verified" },
+      "places_place_id": { "value": "ChIJabc123", "source": "places_api", "confidence": "verified" },
+      "live_display": {
+        "mode": "live_fetch", "max_results": 6, "sort": "highest_rated",
+        "note": "Places-sourced review text/ratings/author photos must be fetched live at render/request time by the backend agent's implementation. Only place_id is persisted here."
+      },
+      "own_site_testimonials": [
+        { "author": "R. Smith", "rating": 5, "text": "Fast and professional.", "date": "2026-05-10" }
+      ]
+    },
+    "content_found": [
+      {
+        "page_guess": "home", "url": "https://acmeplumbing.example.com/",
+        "source": "own_site", "reuse_safe": true,
+        "text_blocks": ["24/7 emergency plumbing since 2012."],
+        "images": [{ "url": "https://acmeplumbing.example.com/team.jpg", "alt_text": "The Acme team", "reuse_safe": true }]
+      }
+    ],
+    "social_profiles_found": ["https://facebook.com/acmeplumbing"],
+    "scrape_notes": ["Pricing page returned 404, price_level left unset."]
+  }
+}

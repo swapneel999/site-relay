@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "scraper-output.schema.json",
+  "title": "scraper-output.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "client_id", "last_updated_at", "last_updated_by", "data"],
+  "properties": {
+    "schema_version": { "type": "string" },
+    "client_id": { "type": "string" },
+    "last_updated_at": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "last_updated_by": { "type": "string" },
+    "data": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scrape_mode", "completeness", "business_info", "reviews",
+        "content_found", "social_profiles_found", "scrape_notes"
+      ],
+      "properties": {
+        "scrape_mode": { "enum": ["own_site", "places_api", "web_search"] },
+        "completeness": { "enum": ["good", "partial", "poor"] },
+        "business_info": {
+          "type": "object", "additionalProperties": false,
+          "required": ["name", "address", "phone", "hours", "categories", "price_level"],
+          "properties": {
+            "name": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+            "address": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+            "phone": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+            "hours": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+            "categories": { "$ref": "common.schema.json#/$defs/sourcedFieldStringArray" },
+            "price_level": { "$ref": "common.schema.json#/$defs/sourcedFieldString" }
+          }
+        },
+        "reviews": {
+          "type": "object", "additionalProperties": false,
+          "required": ["aggregate_rating", "review_count", "places_place_id", "live_display", "own_site_testimonials"],
+          "properties": {
+            "aggregate_rating": { "$ref": "common.schema.json#/$defs/sourcedFieldNumber" },
+            "review_count": { "$ref": "common.schema.json#/$defs/sourcedFieldNumber" },
+            "places_place_id": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+            "live_display": {
+              "type": "object", "additionalProperties": false,
+              "required": ["mode", "max_results", "sort", "note"],
+              "properties": {
+                "mode": { "enum": ["live_fetch", "none"] },
+                "max_results": { "type": "integer", "minimum": 0 },
+                "sort": { "enum": ["most_recent", "highest_rated"] },
+                "note": { "type": "string" }
+              }
+            },
+            "own_site_testimonials": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["author", "rating", "text", "date"],
+                "properties": {
+                  "author": { "type": "string" },
+                  "rating": { "type": ["number", "null"] },
+                  "text": { "type": "string" },
+                  "date": { "type": ["string", "null"] }
+                }
+              }
+            }
+          }
+        },
+        "content_found": {
+          "type": "array",
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["page_guess", "url", "source", "reuse_safe", "text_blocks", "images"],
+            "properties": {
+              "page_guess": { "type": "string" },
+              "url": { "anyOf": [{ "$ref": "common.schema.json#/$defs/url" }, { "type": "null" }] },
+              "source": { "enum": ["own_site", "web_search"] },
+              "reuse_safe": { "type": "boolean" },
+              "text_blocks": { "type": "array", "items": { "type": "string" } },
+              "images": {
+                "type": "array",
+                "items": {
+                  "type": "object", "additionalProperties": false,
+                  "required": ["url", "alt_text", "reuse_safe"],
+                  "properties": {
+                    "url": { "$ref": "common.schema.json#/$defs/url" },
+                    "alt_text": { "type": ["string", "null"] },
+                    "reuse_safe": { "type": "boolean" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "social_profiles_found": { "type": "array", "items": { "$ref": "common.schema.json#/$defs/url" } },
+        "scrape_notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}
