@@ -6,6 +6,7 @@
     "url": { "type": "string", "format": "uri" },
     "hexColor": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" },
     "opaqueId": { "type": "string", "minLength": 1 },
+    "locationId": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "minLength": 1 },
     "category": { "enum": ["visual", "content", "functional", "integration"] },
     "severity": { "enum": ["blocker", "major", "minor"] },
     "sourcedFieldSource": { "enum": ["own_site", "places_api", "web_search", "not_found"] },
