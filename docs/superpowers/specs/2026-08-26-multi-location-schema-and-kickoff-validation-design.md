@@ -73,17 +73,19 @@ Bump `schema_version` to `"2.0"` on `kickoff.schema.json` and `scraper-output.sc
 |---|---|---|
 | `cafe-and-pizzaro-richmond` | `.pipeline/kickoff.json`, `.pipeline/scraper-output.json` | `"richmond"` |
 | `rg-detailing-geelong` | `.pipeline/kickoff.json`, `.pipeline/scraper-output.json` | `"geelong"` |
-| `chaiverse` | `clients/chaiverse/kickoff-chaiverse.json` (see 1.8 — no `scraper-output.json` exists yet) | `"geelong"`, `"werribee"` |
+| `chaiverse` | `clients/chaiverse/.pipeline/kickoff.json` (moved/renamed from `clients/chaiverse/kickoff-chaiverse.json` — see 1.8; no `scraper-output.json` exists yet) | `"geelong"`, `"werribee"` |
 
 For the two single-location clients this is a pure reshape: existing flat `address`/`phone`/`hours` under `business_info` become a one-entry `locations[]` array; existing flat `reviews.aggregate_rating`/`review_count`/`places_place_id`/`live_display` become a one-entry `reviews.by_location[]` array. No data is invented or dropped. Both files' `schema_version` fields get bumped to `"2.0"` as part of the same edit.
 
 `cafe-and-pizzaro-richmond`'s kickoff.json also gets its `primary_contact.email` placeholder string replaced with `null` (honest "unknown," now schema-valid, per 1.3) — not left as a lie that happens to parse as a string.
 
-### 1.8 Chaiverse — not yet fully onboarded, handled as-is
+### 1.8 Chaiverse — wrong path, fix as part of this task; not yet scraped
 
-`clients/chaiverse/kickoff-chaiverse.json` exists (staged, pre-onboarding — not yet under a `.pipeline/` directory, presumably pending `onboard-client.ts`) but there is **no `scraper-output.json` for Chaiverse yet** — the scraper agent hasn't run. Its `primary_contact.email` is already `null`, which happens to already anticipate 1.3.
+`clients/chaiverse/kickoff-chaiverse.json` is at the wrong path — every other client's kickoff file lives at `clients/<client_id>/.pipeline/kickoff.json`, and nothing in this pipeline's tooling (scripts, hooks, agent definitions) looks anywhere else. This task moves/renames it to `clients/chaiverse/.pipeline/kickoff.json` (creating the `.pipeline/` directory), not just edits its contents in place. This is a path correction, not an onboarding step — `onboard-client.ts`'s job is GitHub/Vercel provisioning and `clients.json` registration, neither of which this task performs or depends on.
 
-Scope for this task: add `location_id` (`"geelong"`, `"werribee"`) to its two `business.locations[]` entries and bump `schema_version` to `"2.0"`. File placement (moving it under `.pipeline/`) is an onboarding-process step, not a schema-migration step — out of scope here, left for whoever runs `onboard-client.ts`. No `scraper-output.json` will be created for Chaiverse in this task — fabricating scrape data would misrepresent a real client's content; that's the scraper agent's job to produce for real. It will be reported as "not yet produced" in the validation report, not pass/fail.
+There is **no `scraper-output.json` for Chaiverse yet** — the scraper agent hasn't run. Its `primary_contact.email` is already `null`, which happens to already anticipate 1.3.
+
+Scope for this task: move the file to the correct path, add `location_id` (`"geelong"`, `"werribee"`) to its two `business.locations[]` entries, and bump `schema_version` to `"2.0"`. No `scraper-output.json` will be created for Chaiverse in this task — fabricating scrape data would misrepresent a real client's content; that's the scraper agent's job to produce for real. It will be reported as "not yet produced" in the validation report, not pass/fail.
 
 ### 1.9 `.claude/agents/scraper-agent.md` updates
 
@@ -126,12 +128,11 @@ After implementation, run every touched schema's fixtures through `bun test`, th
 - `cafe-and-pizzaro-richmond/.pipeline/scraper-output.json`
 - `rg-detailing-geelong/.pipeline/kickoff.json`
 - `rg-detailing-geelong/.pipeline/scraper-output.json`
-- `clients/chaiverse/kickoff-chaiverse.json`
+- `clients/chaiverse/.pipeline/kickoff.json` (post-move)
 - Chaiverse `scraper-output.json` — reported as "not yet produced," not pass/fail.
 
 ## Out of scope
 
-- Moving Chaiverse's kickoff file under a `.pipeline/` directory (an `onboard-client.ts` / human-intake step).
 - Running the scraper agent for Chaiverse for real.
 - Adding `minItems: 1` to any `locations`/`by_location` array (noted as a considered-and-declined addition, not silently skipped).
 - Any change to `design-lock.json`, `mockup-approval.json`, `qa-report.json`, `signoff.json`, or `pipeline-status.json` schemas — none of the multi-location changes touch them.
