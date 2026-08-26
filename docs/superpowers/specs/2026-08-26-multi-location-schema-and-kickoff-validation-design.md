@@ -92,8 +92,30 @@ Scope for this task: move the file to the correct path, add `location_id` (`"gee
 Currently documents the flat shape directly (e.g. "populate `business_info.*`... always populate `reviews.aggregate_rating`..."). Updates needed:
 - Step 3 (Places API resolution): call `places-lookup.ts` once per physical location (looping over `kickoff.json`'s `business.locations[]`), matching each result's `location_id` to the corresponding kickoff location entry — not one lookup for the whole business.
 - `SourcedField<T>` wrapping section: clarify which fields are business-wide vs. per-location.
-- `completeness` self-assessment: extend the `good`/`partial`/`poor` thresholds to require the address/phone bar be met for **every** location, not just one — a multi-location scrape that nails Geelong but comes up empty on Werribee should not silently read as `good`.
+- `completeness` self-assessment: replaced entirely by the decided rule in 1.10 below.
 - Reviews & Places API compliance section: same per-location loop applies to the reviews block.
+
+### 1.10 Completeness threshold for multi-location scrapes — decided rule
+
+**Question:** does `good` require *every* location to independently clear the original single-location bar (address+phone resolved), or a more forgiving rule where one fully-resolved location is enough?
+
+**Decision: strict — every location must independently clear the bar for `good`.** Reasoning:
+
+- The three-tier system already has a tier built for exactly the "meaningfully different, but not fully solved" case the forgiving rule is trying to protect: a 2-location scrape that nails one branch and only partially resolves the other lands in `partial`, not `poor` — it is *not* collapsed into the same bucket as a scrape that fails on both locations (that still requires `business_info.name` itself to be unresolved to reach `poor` — a single location's address/phone being entirely missing was never a `poor` trigger even in the original single-location rule, and stays that way here). So the gradation the forgiving rule wants already exists; it just lives in the `partial` tier, not in a loosened `good`.
+- `completeness: good` is a signal downstream stages treat as "safe to proceed without human review" (`docs/spec.md`: "Lets the orchestrator halt to `blocked_needs_human` if a scrape mostly failed"). Letting `good` pass when one physical location's address or phone is entirely unresolved means a real customer could show up at, or call, a location the site can't actually help them reach — for Chaiverse specifically, its own `acceptance_criteria` requires "Both Geelong and Werribee branches are clearly and separately represented (address, hours, map)," which a lenient rule would directly risk violating without any escalation.
+- The `reviews` signal (`aggregate_rating`/`review_count`) is treated differently, deliberately: it stays an OR across all locations (matching the original single-location rule's own "at least one of" phrasing, generalized verbatim), not an AND. A newer branch legitimately having zero reviews yet is a normal, non-alarming state — the review count is a bonus/social-proof signal, not a core "can the customer reach us" fact the way address/phone are. This is the deliberate asymmetry in the design: core identity facts (name, and address/phone per location) get the strict bar; social-proof signals don't.
+
+**The rule, stated exactly** (generalizes the original prose 1:1 — for a single-location client, "every location" and "any location" both collapse to checking that one location, which is provably identical to the original wording):
+
+- **`poor`** if `business_info.name` is `not_found` (`confidence: "missing"`), OR `name.source == "web_search"` with `confidence == "inferred"` (a low-confidence identity guess, the fallback-to-web-search-for-identity case).
+- **`partial`** (checked only if not `poor`) if **any** location has `address.confidence == "missing"` OR `phone.confidence == "missing"` (either alone triggers — matches the original "either one alone triggers this" wording exactly), OR that location has 2-or-more of `{address, phone, hours}` at `confidence: "missing"` (kept for the same belt-and-suspenders reason the original comment gives — with only 3 fields, this is logically subsumed by the first clause, but is kept so the two thresholds can never disagree), OR `content_found` has zero items with a non-empty `text_blocks`, OR the reviews signal is empty everywhere (no location's `aggregate_rating.confidence != "missing"`, AND `own_site_testimonials` is empty).
+- **`good`** otherwise: **every** location has `address` and `phone` both resolved (`confidence != "missing"` — `hours` still exempted, exactly as in the original "not hours" carve-out), **and** at least one `content_found[]` item has a text block, **and** at least one of `{any location's aggregate_rating present, own_site_testimonials non-empty}`.
+
+**Verification, not assumption — a real pure function with tests:** the exact-reduction requirement ("single-location clients must produce byte-identical results to the pre-existing logic") isn't provable by reading prose side-by-side; it needs a real executable check. Adding:
+- `lib/scraper-completeness.ts` — a small pure function, `assessCompleteness(data): "good" | "partial" | "poor"`, taking the exact shape of `scraper-output.json`'s `data.business_info`/`data.content_found`/`data.reviews` (post-migration, multi-location shape) and implementing the rule above. Not wired into the agent's `Bash` allowlist or called at runtime by any agent — its only job is to make the threshold rule executable and testable rather than prose the agent has to interpret by eye each run. (First file under a new top-level `lib/`; every existing `scripts/*.ts` is a Bash-invoked CLI wrapper, which this deliberately isn't.)
+- `tests/lib/scraper-completeness.test.ts` — including the specific case the exact-reduction requirement demands: a fixture with exactly one location, built to be `good` under the pre-existing single-location prose rule (address/phone verified, hours missing — proving the "not hours" carve-out still holds), asserted to still produce `good` under the new function. Plus multi-location cases covering the tiers this decision is actually about: both locations fully resolved → `good`; one fully resolved + one missing only `phone` → `partial` (the "meaningfully different from failing both" case, landing correctly); one fully resolved + one entirely `not_found` on all three fields → `partial`, not `poor` (proving total per-location failure still doesn't escalate past `partial` as long as `name` is known); `name` unresolved → `poor`; reviews empty everywhere with everything else resolved → `partial`.
+
+`.claude/agents/scraper-agent.md`'s completeness section is rewritten to state this exact rule (not a summary of it), so the prose and the tested function agree by construction.
 
 ## Part 2 — Kickoff validation gap
 
@@ -119,6 +141,7 @@ No dedicated test file — matches `onboard-client.ts`'s precedent (no `tests/*.
 - `tests/schemas/fixtures/scraper-output/invalid-missing-confidence.json` — rewrite into the new shape too, keeping its one deliberately-invalid field (missing `confidence`) so the test still exercises the same failure mode.
 - `tests/schemas/full-pipeline.test.ts` — no structural change needed (it just validates each `valid.json` against its own schema and checks `client_id` consistency); will pass once the two fixtures above are updated.
 - `tests/schemas/kickoff.test.ts` / `tests/schemas/scraper-output.test.ts` — add the new nullable-email and per-location test cases.
+- `tests/lib/scraper-completeness.test.ts` (new) — the exact-reduction case plus the multi-location tier cases described in 1.10.
 
 ## Validation report (deliverable, not a file)
 
