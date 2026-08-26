@@ -22,31 +22,51 @@
         "completeness": { "enum": ["good", "partial", "poor"] },
         "business_info": {
           "type": "object", "additionalProperties": false,
-          "required": ["name", "address", "phone", "hours", "categories", "price_level"],
+          "required": ["name", "categories", "price_level", "locations"],
           "properties": {
             "name": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
-            "address": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
-            "phone": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
-            "hours": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
             "categories": { "$ref": "common.schema.json#/$defs/sourcedFieldStringArray" },
-            "price_level": { "$ref": "common.schema.json#/$defs/sourcedFieldString" }
+            "price_level": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+            "locations": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["location_id", "address", "phone", "hours"],
+                "properties": {
+                  "location_id": { "$ref": "common.schema.json#/$defs/locationId" },
+                  "address": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+                  "phone": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+                  "hours": { "$ref": "common.schema.json#/$defs/sourcedFieldString" }
+                }
+              }
+            }
           }
         },
         "reviews": {
           "type": "object", "additionalProperties": false,
-          "required": ["aggregate_rating", "review_count", "places_place_id", "live_display", "own_site_testimonials"],
+          "required": ["by_location", "own_site_testimonials"],
           "properties": {
-            "aggregate_rating": { "$ref": "common.schema.json#/$defs/sourcedFieldNumber" },
-            "review_count": { "$ref": "common.schema.json#/$defs/sourcedFieldNumber" },
-            "places_place_id": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
-            "live_display": {
-              "type": "object", "additionalProperties": false,
-              "required": ["mode", "max_results", "sort", "note"],
-              "properties": {
-                "mode": { "enum": ["live_fetch", "none"] },
-                "max_results": { "type": "integer", "minimum": 0 },
-                "sort": { "enum": ["most_recent", "highest_rated"] },
-                "note": { "type": "string" }
+            "by_location": {
+              "type": "array",
+              "items": {
+                "type": "object", "additionalProperties": false,
+                "required": ["location_id", "aggregate_rating", "review_count", "places_place_id", "live_display"],
+                "properties": {
+                  "location_id": { "$ref": "common.schema.json#/$defs/locationId" },
+                  "aggregate_rating": { "$ref": "common.schema.json#/$defs/sourcedFieldNumber" },
+                  "review_count": { "$ref": "common.schema.json#/$defs/sourcedFieldNumber" },
+                  "places_place_id": { "$ref": "common.schema.json#/$defs/sourcedFieldString" },
+                  "live_display": {
+                    "type": "object", "additionalProperties": false,
+                    "required": ["mode", "max_results", "sort", "note"],
+                    "properties": {
+                      "mode": { "enum": ["live_fetch", "none"] },
+                      "max_results": { "type": "integer", "minimum": 0 },
+                      "sort": { "enum": ["most_recent", "highest_rated"] },
+                      "note": { "type": "string" }
+                    }
+                  }
+                }
               }
             },
             "own_site_testimonials": {

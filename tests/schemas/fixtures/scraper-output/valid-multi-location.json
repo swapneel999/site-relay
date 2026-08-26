@@ -1,0 +1,58 @@
+{
+  "schema_version": "2.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-08-26T10:00:00Z",
+  "last_updated_by": "scraper-agent",
+  "data": {
+    "scrape_mode": "own_site",
+    "completeness": "good",
+    "business_info": {
+      "name": { "value": "Acme Chai Co", "source": "own_site", "confidence": "verified" },
+      "categories": { "value": ["Cafe", "Indian Street Food"], "source": "own_site", "confidence": "verified" },
+      "price_level": { "value": "$$", "source": "web_search", "confidence": "inferred" },
+      "locations": [
+        {
+          "location_id": "geelong",
+          "address": { "value": "23 Cuzens Place, Geelong, VIC 3220, Australia", "source": "own_site", "confidence": "verified" },
+          "phone": { "value": "+61 401 188 283", "source": "own_site", "confidence": "verified" },
+          "hours": { "value": "Mon-Sun 9am-9pm", "source": "places_api", "confidence": "verified" }
+        },
+        {
+          "location_id": "werribee",
+          "address": { "value": "6/57-61 Synnot St, Werribee, VIC 3030, Australia", "source": "own_site", "confidence": "verified" },
+          "phone": { "value": "+61 401 188 284", "source": "places_api", "confidence": "verified" },
+          "hours": { "value": "Mon-Sun 10am-8pm", "source": "places_api", "confidence": "verified" }
+        }
+      ]
+    },
+    "reviews": {
+      "by_location": [
+        {
+          "location_id": "geelong",
+          "aggregate_rating": { "value": 4.9, "source": "places_api", "confidence": "verified" },
+          "review_count": { "value": 210, "source": "places_api", "confidence": "verified" },
+          "places_place_id": { "value": "ChIJgeelongExample", "source": "places_api", "confidence": "verified" },
+          "live_display": { "mode": "live_fetch", "max_results": 5, "sort": "most_recent", "note": "Established branch, strong review history." }
+        },
+        {
+          "location_id": "werribee",
+          "aggregate_rating": { "value": null, "source": "not_found", "confidence": "missing" },
+          "review_count": { "value": null, "source": "not_found", "confidence": "missing" },
+          "places_place_id": { "value": "ChIJwerribeeExample", "source": "places_api", "confidence": "verified" },
+          "live_display": { "mode": "live_fetch", "max_results": 5, "sort": "most_recent", "note": "New branch, no reviews yet — place_id resolved but no rating data returned." }
+        }
+      ],
+      "own_site_testimonials": []
+    },
+    "content_found": [
+      {
+        "page_guess": "home", "url": "https://acmechai.example.com/",
+        "source": "own_site", "reuse_safe": true,
+        "text_blocks": ["Chai. Chaat. Good vibes."],
+        "images": []
+      }
+    ],
+    "social_profiles_found": [],
+    "scrape_notes": ["Werribee is a newer branch with no Google reviews yet — place_id resolved, rating/count left not_found rather than guessed."]
+  }
+}
