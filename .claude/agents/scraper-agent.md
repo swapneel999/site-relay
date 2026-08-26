@@ -134,7 +134,7 @@ Google's Places API ToS permits caching `place_id` indefinitely (and lat/lng for
 
 ```json
 {
-  "schema_version": "1.0",
+  "schema_version": "2.0",
   "client_id": "<same client_id as kickoff.json's envelope>",
   "last_updated_at": "<current UTC timestamp, ISO 8601>",
   "last_updated_by": "scraper-agent",
