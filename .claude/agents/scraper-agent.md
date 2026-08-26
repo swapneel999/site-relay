@@ -56,23 +56,25 @@ Use `WebFetch` against the homepage first, then a small, fixed set of likely sub
 
 For each page you fetch, prompt `WebFetch` to extract: business name, address, phone, hours, categories/services, price signals, any testimonials/reviews shown on-page, and the page's own text/images. Populate one `content_found[]` entry per page, with `source: "own_site"`.
 
-## Step 3: Resolving via Places API
+## Step 3: Resolving via Places API — once per physical location
 
-Call the lookup script via `Bash` — never construct the Places API request yourself, and never handle the raw API key. The script reads `GOOGLE_PLACES_API_KEY` from its own environment; you only ever pass it a search query or a place ID:
+Multi-location clients have more than one entry in `kickoff.json`'s `business.locations[]`, each with its own `location_id`. Call the lookup script via `Bash` once per location — never construct the Places API request yourself, and never handle the raw API key. The script reads `GOOGLE_PLACES_API_KEY` from its own environment; you only ever pass it a search query or a place ID:
 
 ```bash
-bun scripts/places-lookup.ts search --query "Acme Plumbing, 123 Main St, Denver, CO"
+bun scripts/places-lookup.ts search --query "Chaiverse, 23 Cuzens Place, Geelong, VIC 3220, Australia"
 ```
 
-This returns candidate places (id, name, address only — the search step's field mask deliberately excludes rating/review count, since including them there bumps that call into a pricier Google Places SKU tier for no benefit; those fields come from the `details` call below, which you need regardless). Pick the best match (compare name/address against `kickoff.json`), then fetch full details:
+This returns candidate places (id, name, address only — the search step's field mask deliberately excludes rating/review count, since including them there bumps that call into a pricier Google Places SKU tier for no benefit; those fields come from the `details` call below, which you need regardless). Pick the best match for **that specific location** (compare name/address against the corresponding `kickoff.json` `business.locations[]` entry, not any other location), then fetch full details:
 
 ```bash
 bun scripts/places-lookup.ts details --place-id ChIJ...
 ```
 
-Use the result to populate `business_info.*` (if this is your primary `scrape_mode`) and always to populate `reviews.aggregate_rating`, `reviews.review_count`, and `reviews.places_place_id`.
+Repeat search+details for every entry in `kickoff.json`'s `business.locations[]`, matching each Places result back to that location's `location_id`.
 
-If the script errors (missing key, no results, HTTP failure), do not treat that as a fatal error for the whole run — log it in `scrape_notes`, leave the corresponding `SourcedField`s as `{value: null, source: "not_found", confidence: "missing"}`, and continue with whatever other sourcing is still available (falling through toward `web_search` for anything still missing).
+Use each location's details result to populate that location's `business_info.locations[]` entry (`address`, `phone`, `hours`) and its `reviews.by_location[]` entry (`aggregate_rating`, `review_count`, `places_place_id`) — never mix one location's Places result into another's entry. For the business-wide fields (`business_info.name`, `categories`, `price_level`), use the first location's details result if `own_site` scraping didn't already resolve them — these describe the business as a whole, not any one branch, so only one source is needed for them regardless of how many locations exist.
+
+If the script errors for a given location (missing key, no results, HTTP failure), do not treat that as a fatal error for the whole run — log it in `scrape_notes` naming which `location_id` failed, leave that location's corresponding `SourcedField`s as `{value: null, source: "not_found", confidence: "missing"}`, and continue processing the remaining locations and whatever other sourcing is still available (falling through toward `web_search` for anything still missing).
 
 ## Step 4: `web_search` fallback
 
@@ -80,7 +82,7 @@ Use `WebSearch` with the business name and any location info you have. Anything 
 
 ## `SourcedField<T>` wrapping — every leaf value, no exceptions
 
-Every field in `business_info` and `reviews.{aggregate_rating,review_count,places_place_id}` is wrapped:
+Every leaf value is wrapped, whether business-wide or per-location: `business_info.{name,categories,price_level}` (business-wide — one value regardless of location count) and, for each entry in `business_info.locations[]`, its `{address,phone,hours}`; likewise for each entry in `reviews.by_location[]`, its `{aggregate_rating,review_count,places_place_id}`:
 
 ```json
 { "value": T | null, "source": "own_site" | "places_api" | "web_search" | "not_found", "confidence": "verified" | "inferred" | "missing" }
@@ -123,8 +125,8 @@ Whenever you set `partial` or `poor`, add a `scrape_notes[]` entry explaining sp
 
 Google's Places API ToS permits caching `place_id` indefinitely (and lat/lng for 30 days), but **not** review text, ratings breakdowns, or author photos long-term. Concretely:
 
-- `scraper-output.json` gets **only** `reviews.places_place_id`, `reviews.aggregate_rating`, `reviews.review_count`, and the `live_display` config block (`mode`, `max_results`, `sort`, `note`) — never raw review text or author photo URLs.
-- If your Places `details` call returned a `reviews` array (individual review samples), do **not** put it in `scraper-output.json`. Instead, write up to 5 of them, verbatim as returned, to `.pipeline/scraper-cache/places-reviews-preview.json` (create the directory if needed). This file is git-ignored and regenerated every run — it exists purely so the design agent has realistic-looking testimonial content to lay out before live-fetch is wired into the real backend. It is not part of any committed schema and nothing downstream should treat it as durable.
+- `scraper-output.json` gets **only**, per location in `reviews.by_location[]`: `places_place_id`, `aggregate_rating`, `review_count`, and the `live_display` config block (`mode`, `max_results`, `sort`, `note`) — never raw review text or author photo URLs, for any location.
+- If a location's Places `details` call returned a `reviews` array (individual review samples), do **not** put it in `scraper-output.json`. Instead, write up to 5 of them per location, verbatim as returned, to `.pipeline/scraper-cache/places-reviews-preview.json` as `{ "by_location": [ { "location_id": "...", "samples": [...] }, ... ] }` (create the directory if needed) — keyed by `location_id` so the design agent never mixes one branch's sample reviews into another's section. This file is git-ignored and regenerated every run — it exists purely so the design agent has realistic-looking testimonial content to lay out before live-fetch is wired into the real backend. It is not part of any committed schema and nothing downstream should treat it as durable.
 - `own_site_testimonials[]` (found directly on the client's own site) has no such restriction — persist those in full in `scraper-output.json`, they're the client's own published content.
 - This restriction applies to `scrape_notes[]` too, not just the structured `reviews` fields — it's a committed file like any other. When summarizing what the Places lookup found, describe only aggregate facts (rating, review count, a recency range like "reviews sampled from ~1 week to ~6 months old"). Never restate an individual review's text, a reviewer's name, or any other detail specific to one review, no matter how minor or flattering it seems — that's exactly the content the ephemeral `scraper-cache/places-reviews-preview.json` exists to hold instead.
 
