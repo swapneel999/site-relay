@@ -23,7 +23,7 @@
           "required": ["name", "email", "role"],
           "properties": {
             "name": { "type": "string" },
-            "email": { "type": "string", "format": "email" },
+            "email": { "anyOf": [{ "type": "string", "format": "email" }, { "type": "null" }] },
             "role": { "type": "string" }
           }
         },
@@ -47,8 +47,9 @@
               "type": "array",
               "items": {
                 "type": "object", "additionalProperties": false,
-                "required": ["address", "phone", "hours"],
+                "required": ["location_id", "address", "phone", "hours"],
                 "properties": {
+                  "location_id": { "$ref": "common.schema.json#/$defs/locationId" },
                   "address": { "type": "string" }, "phone": { "type": "string" }, "hours": { "type": "string" }
                 }
               }

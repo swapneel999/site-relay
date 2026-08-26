@@ -1,0 +1,46 @@
+{
+  "schema_version": "2.0",
+  "client_id": "acme-co",
+  "last_updated_at": "2026-07-01T09:00:00Z",
+  "last_updated_by": "human/intake",
+  "data": {
+    "primary_contact": { "name": "Jane Doe", "email": null, "role": "Owner" },
+    "languages": ["en"],
+    "business": {
+      "name": "Acme Co", "legal_name": "Acme Co LLC", "industry": "Home Services",
+      "description": "Residential plumbing in the Denver metro area.", "founded_year": 2012,
+      "existing_website_url": "https://acmeplumbing.example.com",
+      "social_profiles": ["https://facebook.com/acmeplumbing"],
+      "google_business_profile_url": "https://maps.google.com/?cid=12345",
+      "locations": [{ "location_id": "main", "address": "123 Main St, Denver, CO", "phone": "+1-303-555-0100", "hours": "Mon-Fri 8am-6pm" }]
+    },
+    "goals": { "primary_conversion_goal": "phone call booking", "secondary_goals": ["email signup"] },
+    "content_inventory": [
+      {
+        "page": "home", "sections": ["hero", "services", "testimonials"],
+        "text_source": "scraper_sourced", "media_source": "client_provides",
+        "represents_real_subject": true, "notes": null
+      }
+    ],
+    "design_direction": {
+      "style_words": ["clean", "trustworthy"], "avoid": ["neon", "clip art"],
+      "reference_sites": [],
+      "brand_assets": { "logo_url": null, "existing_colors": [], "existing_fonts": [] }
+    },
+    "functional_requirements": {
+      "forms": [{ "name": "Contact", "fields": ["name", "email", "message"], "destination_email": null }],
+      "payments": { "required": false, "provider": null },
+      "cms": { "required": false, "type": null },
+      "scheduling": { "required": false, "provider": null },
+      "live_chat": { "required": false, "provider": null },
+      "newsletter": { "required": false, "provider": null },
+      "integrations": []
+    },
+    "constraints": {
+      "domain": null, "timeline_deadline": null,
+      "budget_tier": "starter",
+      "compliance": { "accessibility_level": "none", "privacy_regime": "none" }
+    },
+    "acceptance_criteria": []
+  }
+}
