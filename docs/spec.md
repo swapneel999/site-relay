@@ -11,7 +11,7 @@ Every file wraps its content identically:
 
 | Field | Meaning | Written by |
 |---|---|---|
-| `schema_version` | Schema version this file conforms to (currently `"1.0"`). | Whoever last wrote the file. |
+| `schema_version` | Schema version this file conforms to. Most files are `"1.0"`; `kickoff.json` and `scraper-output.json` are `"2.0"` as of the multi-location schema change (see `docs/superpowers/specs/2026-08-26-multi-location-schema-and-kickoff-validation-design.md`) — existing single-location clients were mechanically migrated, not left on a dual-shape schema. | Whoever last wrote the file. |
 | `client_id` | Opaque identifier for this client, stable for the life of the project. | Set once at kickoff, never changed. |
 | `last_updated_at` | ISO 8601 UTC timestamp of the last write. | Whoever last wrote the file. |
 | `last_updated_by` | Agent identifier of the last writer (e.g. `"scraper-agent"`, `"orchestrator"`, `"human/intake"`). | Whoever last wrote the file. |
@@ -60,7 +60,7 @@ Schema: `schemas/kickoff.schema.json`
 | `business.existing_website_url` | If set, this is the **first signal** the scraper agent checks — presence of this field selects `scrape_mode: own_site`. |
 | `business.social_profiles` | Known social URLs, seeded into the scraper's search even before it starts crawling. |
 | `business.google_business_profile_url` | If set (and `existing_website_url` isn't), selects `scrape_mode: places_api`. |
-| `business.locations` | One or more physical locations; each an `{address, phone, hours}` triple. |
+| `business.locations` | One or more physical locations; each a `{location_id, address, phone, hours}` object. `location_id` is a kebab-slug (`common.schema.json#/$defs/locationId`), opaque and unique only within this file — it's the correlation key `scraper-output.json`'s per-location arrays match back against, chosen explicitly over positional/array-index matching so structured business facts (address, phone, live review data) stay correctly paired even if this array is ever reordered. |
 | `goals.primary_conversion_goal` | The one thing the site should get a visitor to do — informs CTA placement/copy for design. |
 | `content_inventory[]` | Per-page/section plan for where text and media come from. |
 | `content_inventory[].text_source` | `client_provides` (client will supply copy) \| `needs_writing` (someone must write it — design/backend agent's job) \| `scraper_sourced` (pull it from the scrape). |
@@ -89,10 +89,9 @@ Schema: `schemas/scraper-output.schema.json`
 |---|---|
 | `scrape_mode` | Which strategy produced this file — `own_site \| places_api \| web_search`, chosen by the scraper agent's fixed priority order (own site first, then Places, then web search — see `.claude/agents/scraper-agent.md` for the exact decision logic). |
 | `completeness` | Scraper's self-assessment: `good \| partial \| poor`. Lets the orchestrator halt to `blocked_needs_human` if a scrape mostly failed, instead of letting garbage flow into design. |
-| `business_info.*` | Core facts (name, address, phone, hours, categories, price level), each a `SourcedField`. |
-| `reviews.aggregate_rating` / `review_count` | Summary stats, `SourcedField<number>`. |
-| `reviews.places_place_id` | The **only** Places-sourced review data persisted here. Permitted indefinitely under Places API ToS. |
-| `reviews.live_display` | Instructions for the backend agent's *implementation*, not stored review content: `mode` (`live_fetch \| none`), `max_results`, `sort` (`most_recent \| highest_rated`). Review text, ratings, and author photos must be fetched live at render/request time — never baked into this file. See the compliance note below for the `PlacesReviewSample` shape the backend agent's live-fetch code should use. |
+| `business_info.{name,categories,price_level}` | Business-wide core facts, each a `SourcedField` — one value regardless of how many physical locations the business has. |
+| `business_info.locations[]` | Per-location facts: `{location_id, address, phone, hours}`, each of the latter three a `SourcedField`. `location_id` matches the corresponding entry in `kickoff.json`'s `business.locations[]`. |
+| `reviews.by_location[]` | One entry per physical location: `{location_id, aggregate_rating, review_count, places_place_id, live_display}` — each physical location has its own Google Business Profile, so these are never business-wide. `aggregate_rating`/`review_count`/`places_place_id` are each `SourcedField`s; `places_place_id` is the **only** Places-sourced review data persisted here, permitted indefinitely under Places API ToS. `live_display` is instructions for the backend agent's *implementation* for that specific location, not stored review content: `mode` (`live_fetch \| none`), `max_results`, `sort` (`most_recent \| highest_rated`). Review text, ratings, and author photos must be fetched live at render/request time, per location — never baked into this file. See the compliance note below for the `PlacesReviewSample` shape the backend agent's live-fetch code should use. |
 | `reviews.own_site_testimonials[]` | Testimonials found directly on the client's own site (not Places-sourced) — these have no ToS restriction and are persisted in full: `{author, rating, text, date}`. |
 | `content_found[]` | Raw text/image material discovered during the scrape, one entry per page found. |
 | `content_found[].reuse_safe` | `true` = client's own words/photo, safe to use verbatim; `false` = third-party (`web_search`-sourced) content — must be rewritten (text) or must not be used without separate rights clearance (images). Applies per text block's containing item **and** per image individually (`content_found[].images[].reuse_safe`), since an item can mix own-site and third-party images. |
@@ -173,6 +172,7 @@ Read by: design, backend, integration lead.
 | `rounds[].findings[].severity` | `blocker \| major \| minor`. |
 | `rounds[].findings[].status` | Lifecycle: starts `open` → agent sets `fixed_claimed`/`disputed` → QA (next round) sets exactly one of `verified_fixed`, `wont_fix`, or opens a new finding with `reopened_from_id` pointing back (and marks the original `superseded` in that same action). `superseded` findings are permanently excluded from the unresolved check — only the live chain-tip counts. |
 | `rounds[].findings[].reopened_from_id` | Links a reopened finding back to the original it superseded — forms a chain across rounds for the same underlying issue. |
+| `rounds[].findings[].screenshot_ref` | Nullable (QA can flag non-visual issues, e.g. console errors, with nothing to screenshot). When set, must be a path relative to this repo's root — `clients/<client_id>/.pipeline/qa/screenshots/round-{n}/<name>.png` — never a bare filename; Playwright MCP's screenshot tool resolves a bare filename against its own process cwd (this repo's root) and drops it there directly, which is unresolvable to anyone reading the report back later. |
 | `rounds[].acceptance_criteria_check[]` | Fresh, full re-verification of every `kickoff.json.acceptance_criteria` entry, every round — no cross-round linking (unlike findings, an old failure here doesn't carry forward as a record; it's just re-checked). |
 | `rounds[].round_result` | `pass \| fail` — **descriptive/audit only**, not load-bearing for `overall_status`. Recorded so you can see what a round's snapshot looked like at the time, but the actual pass/fail decision always comes from a live re-check of `pass_condition`, never from this stored field. |
 
