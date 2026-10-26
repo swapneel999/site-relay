@@ -1,5 +1,5 @@
 {
-  "name": "website-builder-pipeline-schemas",
+  "name": "site-relay",
   "private": true,
   "type": "module",
   "scripts": {

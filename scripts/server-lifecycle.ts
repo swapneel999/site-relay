@@ -46,7 +46,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 const PORT = 3000;
-const STATE_DIR = join(tmpdir(), "website-builder-mark2-server-lifecycle");
+const STATE_DIR = join(tmpdir(), "site-relay-server-lifecycle");
 const PIDFILE = join(STATE_DIR, "server.pid");
 
 function fail(message: string): never {
