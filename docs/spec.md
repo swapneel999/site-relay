@@ -122,7 +122,7 @@ Schema: `schemas/design-lock.schema.json`
 | Field | Meaning |
 |---|---|
 | `tokens.colors.*` | The locked color palette. `text_on_primary` / `text_on_secondary` / `border` exist specifically so QA can verify contrast ratios against `kickoff.json`'s `accessibility_level` — they're not decorative, they're QA's test input. |
-| `tokens.typography.*` | Font choices and the `h1`–`small` size scale. |
+| `tokens.typography.*` | Font choices and the `h1`–`small` size scale. `heading_font`/`body_font` are required; `label_font` is optional, for clients whose design uses a distinct third face for labels/metadata (e.g. hours, addresses) rather than reusing the body font. |
 | `tokens.breakpoints` | This client's actual responsive breakpoints (`mobile`/`tablet`/`desktop`, in px) — QA's responsive checks use these, not generic assumptions. |
 | `component_catalog[]` | **Append-only.** Every reusable component pattern built so far: `{pattern, library (shadcn\|reactbits), component_name, file_path, variant_notes, added_at, added_during (homepage\|remaining_pages)}`. This is the single source of truth QA checks new patterns against — a page using an undocumented pattern is a QA finding. |
 | `approved_homepage_mockup_ref` | Path to the exact mockup screenshot that was approved — the visual source of truth this lock derives from. |

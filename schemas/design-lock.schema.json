@@ -48,6 +48,7 @@
               "properties": {
                 "heading_font": { "type": "string" },
                 "body_font": { "type": "string" },
+                "label_font": { "type": "string" },
                 "scale": {
                   "type": "object", "additionalProperties": false,
                   "required": ["h1", "h2", "h3", "body", "small"],
